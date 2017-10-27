@@ -128,7 +128,9 @@ png("images/Western_grid2.png",
     width = 5, height = 7, units = "in", pointsize = 12,
     bg = "white", res = 600,
     type = "cairo-png")
+
 par(mfrow=c(1,1))
+
 europemap<-map(database = "worldHires",  xlim = c(-27,6), ylim = c(41.5,68.5),fill=T,plot=F)
 #europe$names
 
