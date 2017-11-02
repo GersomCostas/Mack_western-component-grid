@@ -86,26 +86,26 @@ gridded(RECT_west) = ~lon+lat
 
 # Convert to Spatial Polygon
  
-RECTwest_p <- as(RECT_west, "SpatialPolygons")
+RECT_p <- as(RECT_west, "SpatialPolygons")
  
 
 # PLOTING 
 
-plot(RECTwest_p)
+plot(RECT_p)
 
-slotNames(RECTwest_p)# slot names
+slotNames(RECT_p)# slot names
  
  
 # Original Rectangle names
 
-row.names(RECTwest_p) 
+row.names(RECT_p) 
 
  
 # Use the spChFIDs() method in maptools to change the  IDs of at least one of your objects to disambiguate them 
 
-RECTwest_p <- spChFIDs(RECTwest_p, as.character(RECT_west@data[, 3]))
+RECT_p <- spChFIDs(RECT_p, as.character(RECT_west@data[, 3]))
 
-row.names(RECTwest_p) 
+row.names(RECT_p) 
  
 
 ## join spatialpoligonos ( step by step)
@@ -115,15 +115,15 @@ row.names(RECTwest_p)
  
 ## Projection
  
-proj4string(RECTwest_p) <- CRS("+proj=longlat   +ellps=WGS84 +datum=WGS84")
+proj4string(RECT_p) <- CRS("+proj=longlat   +ellps=WGS84 +datum=WGS84")
 
-RECTwest_p<-SpatialPolygonsDataFrame(RECTwest_p, data=RECT_west_df)
+RECT_p<-SpatialPolygonsDataFrame(RECT_p, data=RECT_west_df)
 
 #View grid
 
-plot(RECTwest_p)
+plot(RECT_p)
 
-# Import land and ploting
+# ploting land + grid
 
 
 
@@ -136,7 +136,7 @@ par(mar=c(2,2,2,2) + 0.1)
 
 map(database = "worldHires",  xlim = c(-23,0.5), ylim = c(43,68.5),fill=T, type="n")
 
-plot(RECTwest_p, border="grey",  xlim = c(-23,0.5), ylim = c(43,68.5))
+plot(RECT_p, border="grey",  xlim = c(-23,0.5), ylim = c(43,68.5))
 
 degAxis(2, at = c(seq(44,69, by=3)),cex.axis = 0.5,las=2)
 
@@ -154,5 +154,4 @@ rm(RECT4, RECT_west, RECTall)
 
 
 save.image("AEPM_grid_mack_Western.RData") 
-
 
