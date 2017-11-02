@@ -50,7 +50,7 @@ if(!require(maps)) install.packages("maps") ; require(maps)
 if(!require(mapdata)) install.packages("mapdata") ; require(mapdata)
 
 #Importing the mackerel Western area rectangles which  have been sampled along survey temporal series. 
-#Rectangle dimensions:  0.5? latitud x 0.5? longitude 
+#Rectangle dimensions:  0.5 degree latitud x 0.5 degree longitude 
 
 RECT4 <- read.csv("data/SurvRects_4.csv")
 
@@ -119,33 +119,38 @@ proj4string(RECTwest_p) <- CRS("+proj=longlat   +ellps=WGS84 +datum=WGS84")
 
 RECTwest_p<-SpatialPolygonsDataFrame(RECTwest_p, data=RECT_west_df)
 
+#View grid
+
+plot(RECTwest_p)
 
 # Import land and ploting
 
 
 
-png("images/Western_grid2.png",
-    width = 5, height = 7, units = "in", pointsize = 12,
-    bg = "white", res = 600,
+png("images/western_survey_grid.png",
+    width = 5, height = 7, units = "in", pointsize = 10,
+    bg = "white", res = 800,
     type = "cairo-png")
 
-par(mfrow=c(1,1))
+par(mar=c(2,2,2,2) + 0.1)
 
-europemap<-map(database = "worldHires",  xlim = c(-27,6), ylim = c(41.5,68.5),fill=T,plot=F)
-#europe$names
+map(database = "worldHires",  xlim = c(-23,0.5), ylim = c(43,68.5),fill=T, type="n")
 
-IDs <- sapply(strsplit(europemap$names, ":"), function(x) x[1])
+plot(RECTwest_p, border="grey",  xlim = c(-23,0.5), ylim = c(43,68.5))
 
-europemap <- map2SpatialPolygons(europemap,IDs=IDs, proj4string=CRS("+proj=longlat   +ellps=WGS84 +datum=WGS84"))
+degAxis(2, at = c(seq(44,69, by=3)),cex.axis = 0.5,las=2)
 
-plot(RECTwest_p, border="grey")
+degAxis(1, at = c(seq(-23,1, by=3)), cex.axis = 0.5, las=2)
 
-plot(europemap,add=T, fill=T,col="darkgreen", border=grey(0.4))
+map(database = "worldHires",  xlim = c(-23,0.5), ylim = c(43,68.5),fill=T, col="darkgreen",add=T)
+
+title("Mackerel western area grid")
+
+box()
 
 dev.off()
 
-
-rm(RECT4, RECT_west, RECTall, IDs)
+rm(RECT4, RECT_west, RECTall)
 
 
 save.image("AEPM_grid_mack_Western.RData") 
