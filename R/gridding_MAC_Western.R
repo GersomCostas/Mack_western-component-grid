@@ -154,6 +154,9 @@ box()
 
 dev.off()
 
+
+
+
 rm(RECT4, RECT_west, RECTall)
 
 
