@@ -79,6 +79,10 @@ RECT_west<-droplevels(RECT_west)
 RECT_west_df<-RECT_west
  
 
+# standardised name for overlap function
+
+RECT<-RECT_west
+
 # Covert to Spatial pixel
  
 gridded(RECT_west) = ~lon+lat
