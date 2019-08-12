@@ -1,6 +1,6 @@
 ############################################
 ## SCRIPT : ANNUAL EGG PRODUCTION FOR NEA MACKEREL. GRIDDING WESTERN AREA 
-## version October 2017
+## version August 2019
 ##
 ## Gersom Costas 
 ## gersom.costas@ieo.es
@@ -48,6 +48,7 @@ if(!require(maptools)) install.packages("maptools") ; require(maptools)
 if(!require(dplyr)) install.packages("dplyr") ; require(dplyr)
 if(!require(maps)) install.packages("maps") ; require(maps)
 if(!require(mapdata)) install.packages("mapdata") ; require(mapdata)
+if(!require(tidyr)) install.packages("tidyr") ; require(tidyr)
 
 #Importing the mackerel Western area rectangles which  have been sampled along survey temporal series. 
 #Rectangle dimensions:  0.5 degree latitud x 0.5 degree longitude 
@@ -107,7 +108,7 @@ row.names(RECT_p)
  
 # Use the spChFIDs() method in maptools to change the  IDs of at least one of your objects to disambiguate them 
 
-RECT_p <- spChFIDs(RECT_p, as.character(RECT_west@data[, 3]))
+RECT_p <- spChFIDs(RECT_p, as.character(RECT_west@data[, "RECT"]))
 
 row.names(RECT_p) 
  
@@ -160,5 +161,133 @@ dev.off()
 rm(RECT4, RECT_west, RECTall)
 
 
-save.image("AEPM_grid_mack_Western.RData") 
+#save.image("AEPM_grid_mack_Western.RData") 
 
+
+####################################
+
+
+
+
+
+####################################
+
+
+
+###updating news rectangles in east part of western component areain 2019
+
+###storing files used until 2016 suveys. 
+
+RECT_p.former<-RECT_p
+RECT.former<-RECT
+
+#Adding the area front Norway (2019) to traditional  the mackerel Western area ( sampled area along survey temporal series)  
+#Rectangle dimensions:  0.5 degree latitud x 0.5 degree longitude 
+
+# Importing  file of proportion in rectangles area that correspond sea(removing covered area by land from rectangle area)
+# Rectangle area   (cos(RECT$lat*pi/180)*30*1853.2)*30*1853.2 
+
+
+RECTall_2019<-read.csv("data/Stat_rectangles_2019_all_rev.csv")
+
+
+RECT_NOR<-filter(RECTall_2019,lat>=60&lat<=65&lon>=0&lon<=5.5)%>% droplevels() ##part of north sea componennet added: front Norway
+
+RECT_west2019<-bind_rows(select(RECT,lat, lon, RECT),select(RECT_NOR,lat, lon, RECT))%>%
+  distinct()%>%
+  left_join(RECTall_2019)%>%
+  select(-radian,-cos)%>%
+  mutate(sea_ratio=replace_na(sea_ratio,1),RECT=as.factor(as.character(RECT)) )%>%
+  rowwise()%>%
+  mutate( Area_minus_land=Area*sea_ratio, Year=2019)%>%
+  droplevels()%>%
+  data.frame
+
+summary(RECT_west2019)
+
+
+
+###dataframe files
+
+RECT_west2019df<-RECT_west2019
+
+# standardised name for overlap function
+
+RECT<-RECT_west2019
+
+# Covert to Spatial pixel
+
+gridded(RECT_west2019) = ~lon+lat
+
+
+# Convert to Spatial Polygon
+
+RECT_p <- as(RECT_west2019, "SpatialPolygons")
+
+
+# PLOTING 
+
+plot(RECT_p)
+
+slotNames(RECT_p)# slot names
+
+
+# Original Rectangle names
+
+row.names(RECT_p) 
+
+
+# Use the spChFIDs() method in maptools to change the  IDs of at least one of your objects to disambiguate them 
+
+RECT_p <- spChFIDs(RECT_p, as.character(RECT_west2019@data[, "RECT"]))
+
+row.names(RECT_p) 
+
+
+## join spatialpoligonos ( step by step)
+
+rownames(RECT_west2019df)<-RECT_west2019df$RECT
+
+
+## Projection
+
+proj4string(RECT_p) <- CRS("+proj=longlat   +ellps=WGS84 +datum=WGS84")
+
+RECT_p<-SpatialPolygonsDataFrame(RECT_p, data=RECT_west2019df)
+
+#View grid
+
+plot(RECT_p)
+
+
+
+# ploting land + grid
+
+png("images/western_survey_grid_2019.png",
+    width = 5, height = 7, units = "in", pointsize = 10,
+    bg = "white", res = 800,
+    type = "cairo-png")
+
+par(mar=c(2,2,2,2) + 0.1)
+
+map(database = "worldHires",  xlim = c(-23,5), ylim = c(43,68.5),fill=T, type="n")
+
+plot(RECT_p, border="grey",  xlim = c(-23,5), ylim = c(43,68.5))
+
+degAxis(2, at = c(seq(44,69, by=3)),cex.axis = 0.5,las=2)
+
+degAxis(1, at = c(seq(-23,4, by=3)), cex.axis = 0.5, las=2)
+
+map(database = "worldHires",  xlim = c(-23,5), ylim = c(43,68.5),fill=T, col="darkgreen",add=T)
+
+title("Mackerel western area grid")
+
+box()
+
+dev.off()
+
+
+rm( RECT_west2019)
+
+
+save.image("AEPM_grid_mack_Western.RData") 
